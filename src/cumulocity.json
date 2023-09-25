@@ -1,0 +1,22 @@
+{
+  "apiVersion": "2",
+  "version": "{VERSION}",
+  "provider": {
+    "name": "Software AG"
+  },
+  "isolation": "MULTI_TENANT",
+  "requiredRoles": [
+    "ROLE_INVENTORY_ADMIN",
+    "ROLE_INVENTORY_READ",
+    "ROLE_ALARM_READ",
+    "ROLE_ALARM_ADMIN",
+    "ROLE_EVENT_READ",
+    "ROLE_EVENT_ADMIN",
+    "ROLE_USER_MANAGEMENT_ADMIN"
+  ],
+  "livenessProbe": {
+    "httpGet": {
+      "path": "/health"
+    }
+  }
+}

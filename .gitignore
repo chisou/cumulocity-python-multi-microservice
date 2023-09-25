@@ -1,0 +1,7 @@
+/.idea/
+/.env-ms
+/.env
+/venv/
+/venv-win/
+/build/
+/dist/

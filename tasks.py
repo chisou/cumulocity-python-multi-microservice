@@ -4,6 +4,7 @@
 # Use, reproduction, transfer, publication or disclosure is prohibited except
 # as specifically provided for in your License Agreement with Software AG.
 
+from get_version import get_version
 from invoke import task
 
 import microservice_util as ms_util
@@ -16,7 +17,7 @@ def show_version(_):
     This version string is inferred from the last Git tag. A tagged HEAD
     should resolve to a clean x.y.z version string.
     """
-    # print(get_version())
+    print(get_version(__file__))
 
 
 @task(help={

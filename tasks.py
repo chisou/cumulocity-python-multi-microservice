@@ -3,15 +3,16 @@
 # and/or its subsidiaries and/or its affiliates and/or their licensors.
 # Use, reproduction, transfer, publication or disclosure is prohibited except
 # as specifically provided for in your License Agreement with Software AG.
-
+import sys
 from datetime import datetime
 from dunamai import Version
 from invoke import task
+import re
 
 import microservice_util as ms_util
 
 # CHANGE THE MICROSERVICE/APPLICATION NAME HERE
-MICROSERVICE_NAME = 'python-ms'
+MICROSERVICE_NAME = 'pythonw-ms'
 
 
 def resolve_version():
@@ -29,6 +30,25 @@ def resolve_version():
     if version.dirty:
         result = result + datetime.now().strftime('-dev%y%m%d%H%M')
     return result
+
+
+@task(help={
+    'name': "New name of the microservice. Needs to conform to Cumulocity"
+            " naming rules.",
+})
+def init(c, name, env=False):
+    """Init the microservice project.
+
+    This sets a default microservice name as it should be represented in
+    Cumulocity.
+    """
+    # (1) Check name pattern (start with a letter followed by any number of
+    #     letters, digits and dashes, no underscores)
+    if not re.match(r'[a-zA-Z]+[a-zA-Z0-9\-]+', name):
+        print(f"Provided name ({name}) does not conform to Cumulocity naming standards.", file=sys.stderr)
+        exit(2)
+    c.run(f'sed -i "s/^MICROSERVICE_NAME = .\\+/MICROSERVICE_NAME = \'{name}\'/" tasks.py')
+    print(f'New microservice name written: {name}')
 
 
 @task
@@ -123,8 +143,8 @@ def get_credentials(_, name=MICROSERVICE_NAME):
     'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
 def create_env(_, name=MICROSERVICE_NAME):
-    """Create a sample specific .env-{sample_name} file using the
-    credentials of a corresponding microservice registered at Cumulocity."""
+    """Create a .env-ms file to hold the credentials of the microservice
+    registered at Cumulocity."""
     base_url, tenant, user, password = ms_util.get_bootstrap_credentials(name)
     with open(f'.env-ms', 'w', encoding='UTF-8') as f:
         f.write(f'C8Y_BASEURL={base_url}\n'

@@ -9,6 +9,14 @@ from invoke import task
 
 import microservice_util as ms_util
 
+# CHANGE THE MICROSERVICE/APPLICATION NAME HERE
+MICROSERVICE_NAME = 'python-ms'
+
+
+def resolve_version():
+    """Resolve a formatted version string based on the latest Git tab."""
+    return get_version(__file__)
+
 
 @task
 def show_version(_):
@@ -17,7 +25,7 @@ def show_version(_):
     This version string is inferred from the last Git tag. A tagged HEAD
     should resolve to a clean x.y.z version string.
     """
-    print(get_version(__file__))
+    print(resolve_version())
 
 
 @task(help={
@@ -41,10 +49,11 @@ def build(c):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
-    "version": "Microservice version. Defaults to '1.0.0'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
+    "version": "Microservice version. If not provided, defaults to a "
+               "generated value based on the last Git tag.",
 })
-def build_ms(c, name='python-ms', version='1.0.0'):
+def build_ms(c, name=MICROSERVICE_NAME, version=None):
     """Build a Cumulocity microservice binary for upload.
 
     This will build a ready to deploy Cumulocity microservice from the
@@ -54,9 +63,9 @@ def build_ms(c, name='python-ms', version='1.0.0'):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
-def register_ms(_, name='python-ms'):
+def register_ms(_, name=MICROSERVICE_NAME):
     """Register a microservice at Cumulocity."""
     try:
         ms_util.register_microservice(name)
@@ -65,9 +74,9 @@ def register_ms(_, name='python-ms'):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
-def deregister_ms(_, name='python-ms'):
+def deregister_ms(_, name=MICROSERVICE_NAME):
     """Deregister a microservice from Cumulocity."""
     try:
         ms_util.unregister_microservice(name)
@@ -76,9 +85,9 @@ def deregister_ms(_, name='python-ms'):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
-def update_ms(_, name='python-ms'):
+def update_ms(_, name=MICROSERVICE_NAME):
     """Update microservice at Cumulocity."""
     try:
         ms_util.update_microservice(name)
@@ -87,9 +96,9 @@ def update_ms(_, name='python-ms'):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
-def get_credentials(_, name='python-ms'):
+def get_credentials(_, name=MICROSERVICE_NAME):
     """Read and print credentials of registered microservice."""
     _, tenant, user, password = ms_util.get_bootstrap_credentials(name)
     print(f"Tenant:    {tenant}\n"
@@ -98,9 +107,9 @@ def get_credentials(_, name='python-ms'):
 
 
 @task(help={
-    'name': "Microservice name. Defaults to 'python-ms'.",
+    'name': f"Microservice name. Defaults to '{MICROSERVICE_NAME}'.",
 })
-def create_env(_, name='python-ms'):
+def create_env(_, name=MICROSERVICE_NAME):
     """Create a sample specific .env-{sample_name} file using the
     credentials of a corresponding microservice registered at Cumulocity."""
     base_url, tenant, user, password = ms_util.get_bootstrap_credentials(name)

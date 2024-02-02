@@ -4,7 +4,8 @@
 # Use, reproduction, transfer, publication or disclosure is prohibited except
 # as specifically provided for in your License Agreement with Software AG.
 
-from get_version import get_version
+from datetime import datetime
+from dunamai import Version
 from invoke import task
 
 import microservice_util as ms_util
@@ -14,8 +15,20 @@ MICROSERVICE_NAME = 'python-ms'
 
 
 def resolve_version():
-    """Resolve a formatted version string based on the latest Git tab."""
-    return get_version(__file__)
+    """Resolve a formatted version string based on the latest VCS tag.
+
+    The VCS tag must have a look like `vx.y.z`, the formatted version string
+    will be `<base>-<num commits>-<date>-<time>`. The number of commits will
+    be omitted if the tag is on the current HEAD. The date and time will be
+    omitted if the local copy is not dirty (i.e. everything is committed).
+    """
+    version = Version.from_any_vcs()
+    result = version.base
+    if version.distance:
+        result = result + '-c' + str(version.distance).rjust(2, '0')
+    if version.dirty:
+        result = result + datetime.now().strftime('-dev%y%m%d%H%M')
+    return result
 
 
 @task
@@ -59,7 +72,7 @@ def build_ms(c, name=MICROSERVICE_NAME, version=None):
     This will build a ready to deploy Cumulocity microservice from the
     sources.
     """
-    c.run(f'./build.sh {name} {version}')
+    c.run(f'./build.sh {name} {version or resolve_version()}')
 
 
 @task(help={

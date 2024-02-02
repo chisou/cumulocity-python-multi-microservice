@@ -1,4 +1,4 @@
-get-version
+dunamai
 invoke
 pylint
 

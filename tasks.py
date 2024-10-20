@@ -12,23 +12,23 @@ import re
 import microservice_util as ms_util
 
 # CHANGE THE MICROSERVICE/APPLICATION NAME HERE
-MICROSERVICE_NAME = 'pythonw-ms'
+MICROSERVICE_NAME = 'python-ms'
 
 
 def resolve_version():
     """Resolve a formatted version string based on the latest VCS tag.
 
     The VCS tag must have a look like `vx.y.z`, the formatted version string
-    will be `<base>-<num commits>-<date>-<time>`. The number of commits will
-    be omitted if the tag is on the current HEAD. The date and time will be
-    omitted if the local copy is not dirty (i.e. everything is committed).
+    will be `<base>[-c<num commits>][-r<date><time>]`. The number of commits
+    will be omitted if the tag is on the current HEAD. The date and time will
+    be omitted if the local copy is not dirty (i.e. everything is committed).
     """
     version = Version.from_any_vcs()
     result = version.base
     if version.distance:
         result = result + '-c' + str(version.distance).rjust(2, '0')
     if version.dirty:
-        result = result + datetime.now().strftime('-dev%y%m%d%H%M')
+        result = result + datetime.now().strftime('-r%y%m%d%H%M')
     return result
 
 
@@ -56,7 +56,7 @@ def show_version(_):
     """Print the module version.
 
     This version string is inferred from the last Git tag. A tagged HEAD
-    should resolve to a clean x.y.z version string.
+    should resolve to a clean semver (vX.Y.Z) version string.
     """
     print(resolve_version())
 
@@ -70,15 +70,6 @@ def lint(c, scope='all'):
     if scope == 'all':
         scope = 'c8y_api c8y_tk tests integration_tests samples'
     c.run(f'pylint {scope}')
-
-
-@task
-def build(c):
-    """Build the module.
-
-    This will create a distributable wheel (.whl) file.
-    """
-    c.run('python -m build')
 
 
 @task(help={
